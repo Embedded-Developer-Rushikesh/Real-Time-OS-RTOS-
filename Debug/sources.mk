@@ -22,7 +22,15 @@ C_DEPS :=
 
 # Every subdirectory with source files must be described here
 SUBDIRS := \
-Inc/Stm32f446xx_Driver_Layer \
-Src \
-Startup \
+Core/Src \
+Core/Startup \
+Drivers/STM32F4xx_HAL_Driver/Src \
+common/ThirdParty/FreeRTOS \
+common/ThirdParty/FreeRTOS/portable/GCC/ARM_CM4F \
+common/ThirdParty/FreeRTOS/portable/MemMang \
+common/ThirdParty/SEGGER/Config \
+common/ThirdParty/SEGGER/OS \
+common/ThirdParty/SEGGER/Rec \
+common/ThirdParty/SEGGER/SEGGER \
+common/ThirdParty/SEGGER/SEGGER/Syscalls \
 

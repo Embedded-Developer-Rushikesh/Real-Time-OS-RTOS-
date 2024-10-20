@@ -1,7 +1,0 @@
-../Src/uart_rx.c:12:6:delay	2
-../Src/uart_rx.c:27:6:USART2_Init	1
-../Src/uart_rx.c:38:6:USART2_GPIOInit	1
-../Src/uart_rx.c:59:6:LED1_Init	1
-../Src/uart_rx.c:71:5:main	4
-../Src/uart_rx.c:113:7:uart_set_baudrate	1
-../Src/uart_rx.c:118:11:compute_uart_bd	1
