@@ -247,9 +247,8 @@ static void task1_handler(void* parameters)
 	while(1)
 	{
 		HAL_UART_Transmit(&huart2, &msg1, strlen(msg1), 100);
-		HAL_Delay(400);
-	//	vTaskDelay( 500 / portTICK_PERIOD_MS);
-		taskYIELD();
+		vTaskDelay( 500 / portTICK_PERIOD_MS);
+	//	taskYIELD();
 	}
 
 }
@@ -260,9 +259,8 @@ static void task2_handler(void* parameters)
 	while(1)
 	{
 		HAL_UART_Transmit(&huart2, &msg2, strlen(msg2), 100);
-		HAL_Delay(400);
-		//vTaskDelay( 500 / portTICK_PERIOD_MS);
-		taskYIELD();
+		vTaskDelay( 500 / portTICK_PERIOD_MS);
+		//taskYIELD();
 	}
 
 }
