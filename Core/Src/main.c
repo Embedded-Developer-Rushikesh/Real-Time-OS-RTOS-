@@ -25,6 +25,7 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include"string.h"
+#include "queue.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -48,7 +49,11 @@ static void button_handler(void* parameters);
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
-
+struct AMessage
+ {
+    char ucMessageID;
+    uint8_t ucData[ 10 ];
+ } xMessage;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -57,9 +62,12 @@ static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
 /* USER CODE BEGIN PFP */
 TaskHandle_t volatile next_task_handle = NULL;
+QueueHandle_t command_queue=NULL;
 TaskHandle_t task1_handle;
 TaskHandle_t task2_handle;
 TaskHandle_t button_handle;
+QueueHandle_t queue_receive;
+QueueHandle_t uart_write_queue;
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -78,7 +86,7 @@ int main(void)
 
 
 	BaseType_t status;
-
+	 xMessage.ucMessageID = 0xab;
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -101,7 +109,11 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_USART2_UART_Init();
+
   /* USER CODE BEGIN 2 */
+  uart_write_queue= xQueueCreate(10,sizeof( struct AMessage * ));
+  queue_receive= xQueueCreate(10,sizeof(  char* ));
+ if(uart_write_queue!=NULL && queue_receive!=NULL){
   status = xTaskCreate(task1_handler, "Task-1", 200, "Hello world from Task-1", 2, &task1_handle);
   configASSERT(status == pdPASS);
 
@@ -112,6 +124,7 @@ int main(void)
   configASSERT(status == pdPASS);
   //start the freeRTOS scheduler
   vTaskStartScheduler();
+}
 
 
   /* USER CODE END 2 */
@@ -247,12 +260,26 @@ static void MX_GPIO_Init(void)
 /* USER CODE BEGIN 4 */
 static void task1_handler(void* parameters)
 {
+	//uint8_t Receive_data;
+	struct AMessage xRxedStructure;
+	BaseType_t status;
 	while(1)
 	{
-		next_task_handle=task2_handle;
-		HAL_UART_Transmit(&huart2, &msg1, strlen(msg1), 100);
-		vTaskDelay( 500 / portTICK_PERIOD_MS);
-	//	taskYIELD();
+		status=xQueueReceive(uart_write_queue,(void*)&xRxedStructure,( TickType_t ) 0 ) ;
+		//next_task_handle=task2_handle;
+		if(status==pdTRUE){
+	if(xRxedStructure.ucData[0]==0){
+		HAL_UART_Transmit(&huart2, &msg2, strlen(msg2), 100);
+		HAL_UART_Transmit(&huart2, (char*)&xRxedStructure.ucData[0], sizeof(10), 100);
+		HAL_GPIO_WritePin(Green_Led_GPIO_Port, Green_Led_Pin,GPIO_PIN_SET);
+		vTaskDelay(pdMS_TO_TICKS(10));
+		}else{
+			HAL_UART_Transmit(&huart2, &xRxedStructure.ucData, sizeof(xRxedStructure.ucData), 100);
+			HAL_GPIO_WritePin(Green_Led_GPIO_Port, Green_Led_Pin,GPIO_PIN_RESET);
+			vTaskDelay(pdMS_TO_TICKS(10));
+		}
+		//taskYIELD();
+		}
 	}
 
 }
@@ -260,39 +287,46 @@ static void task1_handler(void* parameters)
 
 static void task2_handler(void* parameters)
 {
-	BaseType_t  status;
+	//BaseType_t  status;
 	while(1)
 	{
-		status = xTaskNotifyWait(0,0,NULL,pdMS_TO_TICKS(400));
-		if(status == pdTRUE){
+		//status = xTaskNotifyWait(0,0,NULL,pdMS_TO_TICKS(400));
+//		if(status == pdTRUE){
 			//vTaskSuspendAll();
-			HAL_UART_Transmit(&huart2, &msg2, strlen(msg2), 100);
-		}
-		vTaskDelay( 500 / portTICK_PERIOD_MS);
+		//	HAL_UART_Transmit(&huart2, &msg2, strlen(msg2), 100);
+	//	}
+	//	vTaskDelay( 500 / portTICK_PERIOD_MS);
 		//taskYIELD();
 	}
 
 }
 static void button_handler(void* parameters)
 {
-	uint8_t btn_read = 0;
-	uint8_t prev_read = 0;
+	uint8_t btn_read= 0;
+	//uint8_t prev_read = 0;
+	BaseType_t status;
+	struct AMessage xMessage;
 	while(1)
 	{
 		btn_read=HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin);
-		if(!btn_read)
-		{
-			if(!prev_read){
-				xTaskNotify(next_task_handle,0,eNoAction);
-				HAL_GPIO_TogglePin(Green_Led_GPIO_Port, Green_Led_Pin);
-				//vTaskDelay( 500 / portTICK_PERIOD_MS);
+		xMessage.ucData[0]=(uint8_t)btn_read;
+		status=xQueueSend(uart_write_queue,&xMessage,( TickType_t ) 0 );
+		if(status==pdTRUE){
+			HAL_UART_Transmit(&huart2, &btn_read, sizeof(btn_read), 100);
 		}
+//		if(!btn_read)
+//		{
+//			if(!prev_read){
+//				xTaskNotify(next_task_handle,0,eNoAction);
+//				//HAL_GPIO_TogglePin(Green_Led_GPIO_Port, Green_Led_Pin);
+//				//vTaskDelay( 500 / portTICK_PERIOD_MS);
+//		}
 			vTaskDelay(pdMS_TO_TICKS(10));
-			prev_read = btn_read;
-
+//			prev_read = btn_read;
+		//	taskYIELD();
 
 		}
-	}
+
 }
 /* USER CODE END 4 */
 
