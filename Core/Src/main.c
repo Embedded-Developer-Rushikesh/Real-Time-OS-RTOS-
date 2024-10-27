@@ -25,6 +25,7 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include"string.h"
+#include "semphr.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -40,7 +41,9 @@ static void task2_handler(void* parameters);
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
-
+TaskHandle_t task1_handle;
+TaskHandle_t task2_handle;
+xSemaphoreHandle xWork;
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
@@ -60,8 +63,8 @@ static void MX_USART2_UART_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-char msg1[10]="Task1\n";
-char msg2[10]="Task2\n";
+char* msg1="Task2 \n";
+char *msg2="Task1\n";
 /* USER CODE END 0 */
 
 /**
@@ -72,8 +75,8 @@ int main(void)
 {
   /* USER CODE BEGIN 1 */
 
-	TaskHandle_t task1_handle;
-	TaskHandle_t task2_handle;
+
+
 	BaseType_t status;
 
   /* USER CODE END 1 */
@@ -85,7 +88,7 @@ int main(void)
 
   /* USER CODE BEGIN Init */
 
-
+  vSemaphoreCreateBinary( xWork );
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -99,6 +102,7 @@ int main(void)
   MX_GPIO_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
+  if((xWork != NULL) ){
   status = xTaskCreate(task1_handler, "Task-1", 200, "Hello world from Task-1", 2, &task1_handle);
 
   configASSERT(status == pdPASS);
@@ -109,6 +113,7 @@ int main(void)
 
   //start the freeRTOS scheduler
   vTaskStartScheduler();
+}
 
 
   /* USER CODE END 2 */
@@ -244,23 +249,30 @@ static void MX_GPIO_Init(void)
 /* USER CODE BEGIN 4 */
 static void task1_handler(void* parameters)
 {
+
+
+
 	while(1)
 	{
-		HAL_UART_Transmit(&huart2, &msg1, strlen(msg1), 100);
-		vTaskDelay( 500 / portTICK_PERIOD_MS);
-	//	taskYIELD();
+	 xSemaphoreTake( xWork, portMAX_DELAY );
+		HAL_UART_Transmit(&huart2, &msg1[0], strlen(msg1), 100);
+		xSemaphoreGive( xWork);
+		vTaskDelay( 1 / portTICK_PERIOD_MS);
 	}
 
 }
 
-
 static void task2_handler(void* parameters)
 {
+
+	xSemaphoreGive( xWork);
 	while(1)
 	{
-		HAL_UART_Transmit(&huart2, &msg2, strlen(msg2), 100);
-		vTaskDelay( 500 / portTICK_PERIOD_MS);
-		//taskYIELD();
+		xSemaphoreTake( xWork,portMAX_DELAY );
+    	HAL_UART_Transmit(&huart2, &msg2[0], strlen(msg2), 100);
+ 	 xSemaphoreGive( xWork);
+ 	 	vTaskDelay( 1 / portTICK_PERIOD_MS);
+
 	}
 
 }

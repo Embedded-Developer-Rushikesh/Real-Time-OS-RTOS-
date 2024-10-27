@@ -68,8 +68,8 @@ all: main-build
 main-build: FreeRTOS_Kernal_task.elf secondary-outputs
 
 # Tool invocations
-FreeRTOS_Kernal_task.elf FreeRTOS_Kernal_task.map: $(OBJS) $(USER_OBJS) E:\Github\git_repository\FreeRTOS_Kernal\xTaskCreate\Real-Time-OS-RTOS-\STM32F446RETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "FreeRTOS_Kernal_task.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"E:\Github\git_repository\FreeRTOS_Kernal\xTaskCreate\Real-Time-OS-RTOS-\STM32F446RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="FreeRTOS_Kernal_task.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+FreeRTOS_Kernal_task.elf FreeRTOS_Kernal_task.map: $(OBJS) $(USER_OBJS) E:\Github\git_repository\FreeRTOS_Kernal\FreeRTOS_Binary_Semaphore\Real-Time-OS-RTOS-\STM32F446RETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "FreeRTOS_Kernal_task.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"E:\Github\git_repository\FreeRTOS_Kernal\FreeRTOS_Binary_Semaphore\Real-Time-OS-RTOS-\STM32F446RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="FreeRTOS_Kernal_task.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
