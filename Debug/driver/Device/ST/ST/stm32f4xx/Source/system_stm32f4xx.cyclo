@@ -1,0 +1,2 @@
+../driver/Device/ST/ST/stm32f4xx/Source/system_stm32f4xx.c:54:6:SystemCoreClockUpdate	1
+../driver/Device/ST/ST/stm32f4xx/Source/system_stm32f4xx.c:63:6:SystemInit	1
