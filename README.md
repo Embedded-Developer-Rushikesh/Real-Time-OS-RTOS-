@@ -1,1 +1,1 @@
-
+Bare-metal Round Robin scheduler for STM32 ARM Cortex-M. Features preemptive task switching via PendSV, SysTick time-slicing, TCB management, and stack isolation. Implements task states, delays, and fault handling. Demonstrates RTOS fundamentals without external libraries.
